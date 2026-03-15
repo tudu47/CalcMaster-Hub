@@ -1,0 +1,1195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CalcMaster Hub — EMI, SIP, Tax, GST & More Calculators</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>
+  :root{
+    --bg:#0a0e1a; --card:#0f1a2c; --accent1:#00d4ff; --accent2:#8b5cf6; --accent3:#10b981; --muted:#a0b8d0;
+    --success:#10b981; --warning:#f59e0b; --error:#ef4444;
+    --radius:16px; --pad:16px; --glass: rgba(255,255,255,0.05); --shadow: 0 12px 40px rgba(0,0,0,0.4);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  *{box-sizing:border-box;font-family:'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+  html,body{height:100%;margin:0;background:
+    radial-gradient(800px 400px at 10% 10%, rgba(139,92,246,0.08), transparent 50%),
+    radial-gradient(400px 200px at 90% 80%, rgba(0,212,255,0.06), transparent 50%),
+    linear-gradient(180deg, #0a0e1a 0%, var(--bg) 100%);
+    color:#e8f2ff;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1200px;margin:20px auto;padding:0 16px;}
+  header{display:flex;gap:16px;align-items:center;margin-bottom:20px;padding:var(--pad);background:var(--glass);border-radius:var(--radius);border:1px solid rgba(255,255,255,0.04);box-shadow:var(--shadow)}
+  .logo{width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:flex;align-items:center;justify-content:center;box-shadow:0 12px 32px rgba(0,212,255,0.3);transition:var(--transition)}
+  .logo:hover{transform:scale(1.05)}
+  h1{font-size:24px;margin:0;font-weight:700;letter-spacing:-0.5px}
+  .lead{margin:4px 0 0 0;color:var(--muted);font-size:14px;line-height:1.4}
+
+  .topbar{display:flex;gap:12px;align-items:center;margin:16px 0;flex-wrap:wrap}
+  .search{flex:1;display:flex;gap:8px;min-width:200px}
+  input.search-box{width:100%;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:var(--glass);color:inherit;transition:var(--transition);font-size:14px}
+  input.search-box:focus{outline:none;border-color:var(--accent1);box-shadow:0 0 0 3px rgba(0,212,255,0.1)}
+  select.cat-filter{padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:var(--glass);color:inherit;transition:var(--transition);font-size:14px}
+  select.cat-filter:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 3px rgba(139,92,246,0.1)}
+
+  .grid{display:grid;grid-template-columns:340px 1fr;gap:20px;}
+  @media (max-width:960px){ .grid{grid-template-columns:1fr;gap:16px} .left-col{order:2} .topbar{flex-direction:column} .search{order:2;width:100%} }
+
+  /* left panel (tools list) */
+  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));padding:var(--pad);border-radius:var(--radius);border:1px solid rgba(255,255,255,0.04);box-shadow:var(--shadow);overflow:hidden}
+  .panel h3{margin:0 0 12px 0;font-size:16px;font-weight:600;color:#fff}
+  .tool{display:flex;gap:12px;align-items:center;padding:12px;border-radius:12px;cursor:pointer;margin-bottom:8px;transition:var(--transition);position:relative;overflow:hidden}
+  .tool::before{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:var(--glass);opacity:0;transition:var(--transition);z-index:0}
+  .tool:hover{background:rgba(255,255,255,0.04);transform:translateX(4px);box-shadow:0 4px 16px rgba(0,212,255,0.2)}
+  .tool:hover::before{opacity:1}
+  .tool .icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.03);position:relative;z-index:1;flex-shrink:0}
+  .tool .icon svg{fill:currentColor;width:20px;height:20px;opacity:0.8}
+  .tool strong{font-size:14px;font-weight:600;display:block}
+  .cat{font-size:12px;color:var(--muted);line-height:1.3}
+
+  /* main content card */
+  .card{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));padding:var(--pad);border-radius:var(--radius);border:1px solid rgba(255,255,255,0.04);box-shadow:var(--shadow);transition:var(--transition)}
+  .card h2{font-size:20px;margin:0 0 16px 0;font-weight:600;color:#fff}
+  label{display:block;font-size:13px;color:var(--muted);margin-top:12px;font-weight:500}
+  input[type="number"], input[type="date"], input[type="month"], select, textarea{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:var(--glass);color:inherit;font-size:14px;transition:var(--transition)}
+  input:focus, select:focus, textarea:focus{outline:none;border-color:var(--accent1);box-shadow:0 0 0 3px rgba(0,212,255,0.1)}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row .col{flex:1;min-width:160px}
+  button.btn{margin-top:12px;padding:12px 20px;border-radius:12px;border:0;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#fff;transition:var(--transition);font-size:14px;box-shadow:0 4px 16px rgba(0,212,255,0.3)}
+  button.btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,212,255,0.4)}
+  button.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 16px;border-radius:12px;color:var(--muted);transition:var(--transition);font-size:14px}
+  button.btn-ghost:hover{background:var(--glass);border-color:var(--accent2);color:#fff}
+  .result{margin-top:16px;padding:16px;border-radius:12px;background:var(--glass);border:1px solid rgba(255,255,255,0.02);transition:var(--transition)}
+  .result.show{animation:fadeIn 0.3s ease-out}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)}}
+  .k{font-size:18px;font-weight:700;color:var(--accent1);margin:4px 0}
+  .muted{color:var(--muted)}
+  .mini{font-size:13px;color:var(--muted);line-height:1.4}
+  footer{margin-top:24px;padding:12px;color:var(--muted);font-size:12px;text-align:center;border-top:1px solid rgba(255,255,255,0.04)}
+
+  /* small helpers */
+  .flex{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .success{color:var(--success)}
+  .warning{color:var(--warning)}
+  .error{color:var(--error)}
+
+  /* scroll smooth */
+  #toolsList{max-height:70vh;overflow-y:auto;scroll-behavior:smooth}
+  #toolsList::-webkit-scrollbar{width:6px}
+  #toolsList::-webkit-scrollbar-track{background:transparent}
+  #toolsList::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.2);border-radius:3px}
+
+  /* Extra tools styling */
+  .expense-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .expense-item {
+    background: var(--glass);
+    padding: 8px 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .expense-item label {
+    margin: 0;
+    font-size: 14px;
+    min-width: 110px;
+  }
+  .expense-item input {
+    flex: 1;
+    padding: 8px;
+  }
+  .tool-section {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+  .tool-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .tool-header h2 {
+    margin: 0;
+  }
+  .button-group {
+    display: flex;
+    gap: 8px;
+  }
+  .result-box {
+    background: var(--glass);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    
+<!-- TOP BANNER AD -->
+<div style="width:100%;text-align:center;margin:15px 0">
+<script>
+  atOptions = {
+    'key' : '55f4ffb34610449af1a7604764645ff5',
+    'format' : 'iframe',
+    'height' : 90,
+    'width' : 728,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/55f4ffb34610449af1a7604764645ff5/invoke.js"></script>
+</div>
+<header>
+      <div class="logo" aria-hidden>
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="12" r="4" fill="white" fill-opacity="0.2"/>
+          <path d="M12 8v8M8 12h8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <h1>CalcMaster Hub</h1>
+        <p class="lead">Empowering Your Financial Journey with Instant, Accurate Tools | Loans, Investments, Taxes & Everyday Essentials — All in One Place</p>
+      </div>
+    </header>
+
+    <div class="topbar">
+      <div class="search">
+        <input id="search" class="search-box" placeholder="Search tools: EMI, SIP, Tax, GST, Age..." />
+      </div>
+      <select id="categoryFilter" class="cat-filter">
+        <option value="">All Categories</option>
+      </select>
+    </div>
+
+    <div class="grid">
+      <aside class="left-col panel">
+        <h3>Quick Tools</h3>
+        <div id="toolsList"></div>
+      </aside>
+
+      <main class="card" id="mainCard">
+        <div id="mainContent">
+          <h2 class="mini muted">Welcome to CalcMaster</h2>
+          <p class="muted">Discover powerful calculators for finance, investments, utilities & more. Select from the left sidebar or search above for instant results. Optimized for mobile & desktop.</p>
+          <div class="flex" style="margin-top:16px"><span class="success">✓</span> Real-time calculations <span class="success">✓</span> Customizable inputs <span class="success">✓</span> Precise outputs</div>
+        </div>
+      </main>
+    </div>
+
+    <footer>© 2025 CalcMaster Hub | Precision Tools for Everyday Brilliance</footer>
+  </div>
+
+<script>
+/* ------------------------------
+   Tools metadata with icons
+   ------------------------------ */
+const tools = [
+  {id:'age', title:'Age Calculator', cat:'Utility', desc:'Precise age in years, months & days from DOB', icon: '🗓️'},
+  {id:'emi', title:'EMI Calculator', cat:'Loans', desc:'Monthly EMI, total interest & repayment schedule', icon: '🏦'},
+  {id:'loan', title:'Loan Eligibility', cat:'Loans', desc:'Estimate eligibility based on income & terms', icon: '💳'},
+  {id:'sip', title:'SIP Returns', cat:'Investments', desc:'Future value & gains from monthly SIP investments', icon: '📈'},
+  {id:'fd', title:'FD Maturity', cat:'Investments', desc:'Lumpsum FD growth with compounding options', icon: '💰'},
+  {id:'rd', title:'RD Calculator', cat:'Investments', desc:'Recurring deposit maturity & interest earned', icon: '🔄'},
+  {id:'income_tax', title:'Income Tax', cat:'Finance', desc:'Estimate tax with custom slabs or flat rates', icon: '💼'},
+  {id:'gst', title:'GST Calculator', cat:'Business', desc:'Add/remove GST & reverse calculations', icon: '🛒'},
+  {id:'salary', title:'Salary In-Hand', cat:'Finance', desc:'Net take-home after PF & tax deductions', icon: '💵'},
+  {id:'interest', title:'Interest Calc', cat:'Finance', desc:'Simple or compound interest computations', icon: '📊'},
+  {id:'currency', title:'Currency Converter', cat:'Utility', desc:'Convert currencies with manual rates', icon: '🌍'},
+  {id:'profit', title:'Profit Margin', cat:'Business', desc:'Margins, markups & optimal pricing', icon: '🛍️'},
+  {id:'electric', title:'Electric Bill', cat:'Utility', desc:'Bill estimate from units & custom slabs', icon: '⚡'},
+  {id:'discount', title:'Discount Tool', cat:'Business', desc:'Final price & savings after discounts', icon: '🔥'}
+];
+
+/* category filter */
+const cats = [...new Set(tools.map(t=>t.cat))].sort();
+const catSel = document.getElementById('categoryFilter');
+cats.forEach(c => {
+  const op = document.createElement('option'); op.value = c; op.textContent = c; catSel.appendChild(op);
+});
+
+/* icon map for SVGs (fallback to emoji) */
+const iconSVGs = {
+  age: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><circle cx="12" cy="8" r="2"/><path d="M12 10v6"/></svg>',
+  emi: '<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/></svg>',
+  loan: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>',
+  sip: '<svg viewBox="0 0 24 24"><polyline points="22,12 18,20 6,20 2,12 6,4 18,4" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
+  fd: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="2"/></svg>',
+  rd: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="2"/></svg>',
+  income_tax: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>',
+  gst: '<svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>',
+  salary: '<svg viewBox="0 0 24 24"><path d="M20 7l-8-4-8 4m16 0v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7m16 0v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7m16 0h-2m-14 0H4"/></svg>',
+  interest: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
+  currency: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 21l1.5-1.5L5 21"/></svg>',
+  profit: '<svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
+  electric: '<svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-6z"/></svg>',
+  discount: '<svg viewBox="0 0 24 24"><path d="M19 7l-8 8-4-4-7 7"/></svg>'
+};
+
+/* render tools list */
+const toolsList = document.getElementById('toolsList');
+function renderTools(filterText='', filterCat=''){
+  toolsList.innerHTML = '';
+  const f = filterText.trim().toLowerCase();
+  tools.filter(t => (!filterCat || t.cat===filterCat) && (!f || (t.title+t.desc+t.cat).toLowerCase().includes(f)))
+       .forEach(t=>{
+    const div = document.createElement('div'); div.className='tool';
+    const iconHtml = iconSVGs[t.id] ? iconSVGs[t.id] : `<span style="font-size:20px">${t.icon}</span>`;
+    div.innerHTML = `<div class="icon" aria-hidden>${iconHtml}</div>
+      <div style="flex:1"><strong>${t.title}</strong><div class="cat">${t.cat} · <span class="muted">${t.desc}</span></div></div>`;
+    div.onclick = ()=>openTool(t.id);
+    toolsList.appendChild(div);
+  });
+  if (toolsList.children.length === 0) {
+    toolsList.innerHTML = '<div class="mini muted" style="text-align:center;padding:20px">No tools match your search. Try broader terms!</div>';
+  }
+}
+renderTools();
+
+/* search & filter handlers */
+document.getElementById('search').addEventListener('input', e=>{
+  renderTools(e.target.value, document.getElementById('categoryFilter').value);
+});
+catSel.addEventListener('change', e=>{
+  renderTools(document.getElementById('search').value, e.target.value);
+});
+
+/* helper format */
+function fmt(n){
+  if (!isFinite(n)) return '-'; 
+  return Number(n).toLocaleString(undefined,{maximumFractionDigits:2,minimumFractionDigits: (Math.abs(n) < 1 && n!==0) ? 2:0});
+}
+
+/* error handler */
+function showError(el, msg) {
+  el.innerHTML = `<div class="error" style="padding:8px"><strong>⚠️</strong> ${msg}</div>`;
+  el.classList.add('show');
+}
+
+/* main content switch */
+const mainContent = document.getElementById('mainContent');
+function openTool(id){
+  mainContent.innerHTML = '<div class="mini muted" style="text-align:center;padding:40px">Loading...</div>';
+  setTimeout(() => { // smooth transition
+    if (id==='age') return renderAge();
+    if (id==='emi') return renderEMI();
+    if (id==='loan') return renderLoan();
+    if (id==='sip') return renderSIP();
+    if (id==='fd') return renderFD();
+    if (id==='rd') return renderRD();
+    if (id==='income_tax') return renderIncomeTax();
+    if (id==='gst') return renderGST();
+    if (id==='salary') return renderSalary();
+    if (id==='interest') return renderInterest();
+    if (id==='currency') return renderCurrency();
+    if (id==='profit') return renderProfit();
+    if (id==='electric') return renderElectric();
+    if (id==='discount') return renderDiscount();
+    mainContent.innerHTML = '<h2 class="mini muted">Tool Not Found</h2><p class="muted">Select another from the sidebar.</p>';
+  }, 150);
+}
+
+/* -------------------
+   Calculator Renderers with Clear Button added
+   ------------------- */
+
+/* 1. Age */
+function renderAge(){
+  mainContent.innerHTML = `
+    <h2>Age Calculator</h2>
+    <div class="row">
+      <div class="col"><label>Day (1-31)</label><input type="number" id="age-day" min="1" max="31" value="1" /></div>
+      <div class="col"><label>Month (1-12)</label><input type="number" id="age-month" min="1" max="12" value="1" /></div>
+      <div class="col"><label>Year (1900-2100)</label><input type="number" id="age-year" min="1900" max="2100" value="2000" /></div>
+    </div>
+    <div class="row"><div class="col">
+      <button class="btn" id="calc-age">Calculate Age</button>
+      <button class="btn-ghost" id="clear-age" style="margin-left:8px;">Clear</button>
+    </div></div>
+    <div id="age-res" class="result"></div>
+  `;
+  document.getElementById('calc-age').onclick = ()=>{
+    const day = parseInt(document.getElementById('age-day').value, 10);
+    const month = parseInt(document.getElementById('age-month').value, 10);
+    const year = parseInt(document.getElementById('age-year').value, 10);
+    const res = document.getElementById('age-res');
+    
+    if (!day || !month || !year || day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > 2100) {
+      return showError(res, 'Please enter valid day (1-31), month (1-12), and year (1900-2100).');
+    }
+    
+    const dob = new Date(year, month-1, day);
+    if (dob.getDate() !== day || dob.getMonth() !== month-1 || dob.getFullYear() !== year) {
+      return showError(res, 'Invalid date. Please check day/month combination.');
+    }
+    
+    const now = new Date();
+    if (dob > now) return showError(res, 'Date of birth cannot be in the future!');
+    
+    let y = now.getFullYear() - dob.getFullYear();
+    let m = now.getMonth() - dob.getMonth();
+    let d = now.getDate() - dob.getDate();
+    if (d < 0){ m--; d += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
+    if (m < 0){ y--; m += 12; }
+    
+    const diffTime = now - dob;
+    const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const weeks = Math.floor(totalDays / 7);
+    const remainingDays = totalDays % 7;
+    
+    let nextBirthday = new Date(now.getFullYear(), month-1, day);
+    if (nextBirthday < now) {
+      nextBirthday.setFullYear(now.getFullYear() + 1);
+    }
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const nextBirthdayStr = nextBirthday.toLocaleDateString(undefined, options);
+    
+    res.innerHTML = `
+      <div class="k">${y} years, ${m} months, ${d} days</div>
+      <div style="margin-top:8px"><strong>Total:</strong> ${totalDays} days | ${weeks} weeks, ${remainingDays} days</div>
+      <div style="margin-top:8px"><strong>Next Birthday:</strong> ${nextBirthdayStr}</div>
+      <div class="mini muted">From ${dob.toLocaleDateString()} to today</div>
+    `;
+    res.classList.add('show');
+  };
+  // Clear button
+  document.getElementById('clear-age').onclick = function() {
+    document.getElementById('age-day').value = '1';
+    document.getElementById('age-month').value = '1';
+    document.getElementById('age-year').value = '2000';
+    const resDiv = document.getElementById('age-res');
+    resDiv.innerHTML = '';
+    resDiv.classList.remove('show');
+  };
+}
+
+/* 2. EMI */
+function renderEMI(){
+  mainContent.innerHTML = `
+    <h2>EMI Calculator</h2>
+    <label>Loan Amount (₹)</label><input type="number" id="emi-pr" value="500000" min="0" step="1000" />
+    <div class="row"><div class="col"><label>Annual Interest Rate (%)</label><input type="number" id="emi-rate" step="0.01" value="8.5" min="0" /></div><div class="col"><label>Tenure (Years)</label><input type="number" id="emi-years" value="10" min="0.1" step="0.1" /></div></div>
+    <div class="row"><div class="col"><label>Processing Fee (₹)</label><input type="number" id="emi-fee" value="0" min="0" /></div><div class="col"><label>Start Month (Optional)</label><input type="month" id="emi-start" /></div></div>
+    <button class="btn" id="btn-emi">Calculate EMI</button>
+    <button class="btn-ghost" id="clear-emi" style="margin-left:8px;">Clear</button>
+    <div id="emi-res" class="result"></div>
+  `;
+  document.getElementById('btn-emi').onclick = ()=>{
+    const P = parseFloat(document.getElementById('emi-pr').value) || 0;
+    const annual = parseFloat(document.getElementById('emi-rate').value) || 0;
+    const years = parseFloat(document.getElementById('emi-years').value) || 0;
+    const fee = parseFloat(document.getElementById('emi-fee').value) || 0;
+    const n = Math.round(years * 12);
+    const res = document.getElementById('emi-res');
+    if (P <= 0) return showError(res, 'Enter a valid loan amount.');
+    if (annual < 0) return showError(res, 'Interest rate cannot be negative.');
+    if (n <= 0) return showError(res, 'Enter a valid tenure.');
+    const r = annual / 100 / 12;
+    let emi = r === 0 ? P / n : P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+    const total = emi * n + fee;
+    const interest = total - P - fee;
+    res.innerHTML = `
+      <div class="flex" style="justify-content:space-between;align-items:flex-end"><div><strong>Monthly EMI</strong><div class="k">₹ ${fmt(emi)}</div></div>
+      <div><strong>Total Payable</strong><div class="k">₹ ${fmt(total)}</div></div></div>
+      <div class="mini muted" style="margin-top:8px">Interest: ₹ ${fmt(interest)} | Tenure: ${n} months</div>`;
+    res.classList.add('show');
+  };
+  document.getElementById('clear-emi').onclick = function() {
+    document.getElementById('emi-pr').value = '500000';
+    document.getElementById('emi-rate').value = '8.5';
+    document.getElementById('emi-years').value = '10';
+    document.getElementById('emi-fee').value = '0';
+    document.getElementById('emi-start').value = '';
+    const resDiv = document.getElementById('emi-res');
+    resDiv.innerHTML = '';
+    resDiv.classList.remove('show');
+  };
+}
+
+/* 3. Loan Eligibility */
+function renderLoan(){
+  mainContent.innerHTML = `
+    <h2>Loan Eligibility Checker</h2>
+    <label>Desired Loan Amount (₹)</label><input id="loan-amt" type="number" value="300000" min="0" step="1000" />
+    <div class="row"><div class="col"><label>Annual Rate (%)</label><input id="loan-rate" type="number" step="0.01" value="9" min="0" /></div><div class="col"><label>Tenure (Years)</label><input id="loan-ten" type="number" value="5" min="0.1" step="0.1" /></div></div>
+    <label>Monthly Income (₹)</label><input id="loan-income" type="number" value="50000" min="0" />
+    <div class="mini muted">Eligibility assumes EMI ≤ specified % of income (standard: 50%)</div>
+    <div class="row"><div class="col"><label>Max EMI as % of Income</label><input id="loan-emi-percent" type="number" value="50" min="1" max="100" /></div></div>
+    <button class="btn" id="loan-calc">Check Eligibility</button>
+    <button class="btn-ghost" id="clear-loan" style="margin-left:8px;">Clear</button>
+    <div id="loan-res" class="result"></div>
+  `;
+  document.getElementById('loan-calc').onclick = ()=>{
+    const L = parseFloat(document.getElementById('loan-amt').value)||0;
+    const rAnn = parseFloat(document.getElementById('loan-rate').value)||0;
+    const years = parseFloat(document.getElementById('loan-ten').value)||0;
+    const inc = parseFloat(document.getElementById('loan-income').value)||0;
+    const percent = parseFloat(document.getElementById('loan-emi-percent').value)||50;
+    const n = Math.round(years*12);
+    const res = document.getElementById('loan-res');
+    if (L <= 0 || inc <= 0) return showError(res, 'Enter valid loan amount and income.');
+    if (n <= 0) return showError(res, 'Enter valid tenure.');
+    const r = rAnn/100/12;
+    let emi = r===0 ? L/n : L*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+    const maxEmi = inc * (percent/100);
+    const eligible = maxEmi >= emi;
+    const statusClass = eligible ? 'success' : 'warning';
+    res.innerHTML = `
+      <div><strong>Calculated EMI:</strong> <span class="k">₹ ${fmt(emi)}</span> / month</div>
+      <div style="margin-top:8px"><strong>Max Affordable EMI:</strong> <span class="k">₹ ${fmt(maxEmi)}</span> (${percent}% of income)</div>
+      <div style="margin-top:12px"><strong>Status:</strong> <span class="${statusClass}"> ${eligible ? '✅ Eligible' : '❌ Adjust terms for eligibility'}</span></div>
+      <div class="mini muted">${eligible ? 'Proceed with application.' : 'Tip: Increase tenure or reduce amount.'}</div>`;
+    res.classList.add('show');
+  };
+  document.getElementById('clear-loan').onclick = function() {
+    document.getElementById('loan-amt').value = '300000';
+    document.getElementById('loan-rate').value = '9';
+    document.getElementById('loan-ten').value = '5';
+    document.getElementById('loan-income').value = '50000';
+    document.getElementById('loan-emi-percent').value = '50';
+    const resDiv = document.getElementById('loan-res');
+    resDiv.innerHTML = '';
+    resDiv.classList.remove('show');
+  };
+}
+
+/* 4. SIP */
+function renderSIP(){
+  mainContent.innerHTML = `
+    <h2>SIP Return Calculator</h2>
+    <label>Monthly Investment (₹)</label><input id="sip-amt" type="number" value="5000" min="0" step="100" />
+    <div class="row"><div class="col"><label>Expected Annual Return (%)</label><input id="sip-rate" type="number" value="12" step="0.01" min="0" /></div><div class="col"><label>Investment Period (Years)</label><input id="sip-years" type="number" value="10" min="0.1" step="0.1" /></div></div>
+    <button class="btn" id="sip-btn">Estimate Returns</button>
+    <button class="btn-ghost" id="clear-sip" style="margin-left:8px;">Clear</button>
+    <div id="sip-res" class="result"></div>
+  `;
+  document.getElementById('sip-btn').onclick = ()=>{
+    const P = parseFloat(document.getElementById('sip-amt').value)||0;
+    const ann = parseFloat(document.getElementById('sip-rate').value)||0;
+    const years = parseFloat(document.getElementById('sip-years').value)||0;
+    const n = Math.round(years*12);
+    const res = document.getElementById('sip-res');
+    if (P <= 0) return showError(res, 'Enter a valid monthly investment.');
+    if (n <= 0) return showError(res, 'Enter a valid period.');
+    const r = ann/100/12;
+    let maturity = r===0 ? P * n : P * ((Math.pow(1+r,n)-1)/r) * (1+r);
+    const invested = P * n;
+    const gain = maturity - invested;
+    res.innerHTML = `<div class="k">Maturity Value: ₹ ${fmt(maturity)}</div><div style="margin-top:8px"><strong>Total Invested:</strong> ₹ ${fmt(invested)} | <strong>Gains:</strong> <span class="success">₹ ${fmt(gain)}</span></div><div class="mini muted">Based on ${ann}% annual return, compounded monthly.</div>`;
+    res.classList.add('show');
+  };
+  document.getElementById('clear-sip').onclick = function() {
+    document.getElementById('sip-amt').value = '5000';
+    document.getElementById('sip-rate').value = '12';
+    document.getElementById('sip-years').value = '10';
+    const resDiv = document.getElementById('sip-res');
+    resDiv.innerHTML = '';
+    resDiv.classList.remove('show');
+  };
+}
+
+/* 5. FD */
+function renderFD(){
+  mainContent.innerHTML = `
+    <h2>FD Maturity Calculator</h2>
+    <label>Principal Amount (₹)</label><input id="fd-pr" type="number" value="100000" min="0" step="100" />
+    <div class="row"><div class="col"><label>Annual Interest Rate (%)</label><input id="fd-rate" type="number" value="6.5" step="0.01" min="0" /></div><div class="col"><label>Tenure (Years)</label><input id="fd-years" type="number" value="3" min="0.1" step="0.1" /></div></div>
+    <label>Compounding Frequency</label>
+    <select id="fd-freq"><option value="1">Annually</option><option value="4" selected>Quarterly</option><option value="12">Monthly</option></select>
+    <button class="btn" id="fd-btn">Calculate Maturity</button>
+    <button class="btn-ghost" id="clear-fd" style="margin-left:8px;">Clear</button>
+    <div id="fd-res" class="result"></div>
+  `;
+  document.getElementById('fd-btn').onclick = ()=>{
+    const P = parseFloat(document.getElementById('fd-pr').value)||0;
+    const ann = parseFloat(document.getElementById('fd-rate').value)||0;
+    const y = parseFloat(document.getElementById('fd-years').value)||0;
+    const m = parseInt(document.getElementById('fd-freq').value)||1;
+    const res = document.getElementById('fd-res');
+    if (P <= 0) return showError(res, 'Enter a valid principal.');
+    if (y <= 0) return showError(res, 'Enter a valid tenure.');
+    const r = ann/100;
+    const A = P * Math.pow(1 + r/m, m*y);
+    const interest = A - P;
+    res.innerHTML = `<div class="k">Maturity Amount: ₹ ${fmt(A)}</div><div style="margin-top:8px"><strong>Interest Earned:</strong> <span class="success">₹ ${fmt(interest)}</span></div><div class="mini muted">Compounded ${['','monthly','quarterly','annually'][m] || 'custom'}.</div>`;
+    res.classList.add('show');
+  };
+  document.getElementById('clear-fd').onclick = function() {
+    document.getElementById('fd-pr').value = '100000';
+    document.getElementById('fd-rate').value = '6.5';
+    document.getElementById('fd-years').value = '3';
+    document.getElementById('fd-freq').value = '4';
+    const resDiv = document.getElementById('fd-res');
+    resDiv.innerHTML = '';
+    resDiv.classList.remove('show');
+  };
+}
+
+/* 6. RD */
+function renderRD(){
+  mainContent.innerHTML = `
+    <h2>RD Maturity Calculator</h2>
+    <label>Monthly Deposit (₹)</label><input id="rd-amt" type="number" value="2000" min="0" step="100" />
+    <div class="row"><div class="col"><label>Annual Interest Rate (%)</label><input id="rd-rate" type="number" value="6.5" step="0.01" min="0" /></div><div class="col"><label>Tenure (Years)</label><input id="rd-years" type="number" value="5" min="0.1" step="0.1" /></div></div>
+    <button class="btn" id="rd-btn">Calculate Maturity</button>
+    <button class="btn-ghost" id="clear-rd" style="margin-left:8px;">Clear</button>
+    <div id="rd-res" class="result"></div>
+  `;
+  document.getElementById('rd-btn').onclick = ()=>{
+    const P = parseFloat(document.getElementById('rd-amt').value)||0;
+    const ann = parseFloat(document.getElementById('rd-rate').value)||0;
+    const y = parseFloat(document.getElementById('rd-years').value)||0;
+    const n = Math.round(y*12);
+    const res = document.getElementById('rd-res');
+    if (P <= 0) return showError(res, 'Enter a valid monthly deposit.');
+    if (n <= 0) return showError(res, 'Enter a valid tenure.');
+    const r = ann/100/12;
+    let maturity = 0;
+    for(let i = 0; i < n; i++){ maturity += P * Math.pow(1 + r, n - i); }
+    const invested = P * n;
+    const interest = maturity - invested;
+    res.innerHTML = `<div class="k">Maturity Amount: ₹ ${fmt(maturity)}</div><div style="margin-top:8px"><strong>Total Invested:</strong> ₹ ${fmt(invested)} | <strong>Interest:</strong> <span class="success">₹ ${fmt(interest)}</span></div><div class="mini muted">Monthly compounding assumed.</div>`;
+    res.classList.add('show');
+  };
+  document.getElementById('clear-rd').onclick = function() {
+    document.getElementById('rd-amt').value = '2000';
+    document.getElementById('rd-rate').value = '6.5';
+    document.getElementById('rd-years').value = '5';
+    const resDiv = document.getElementById('rd-res');
+    resDiv.innerHTML = '';
+    resDiv.classList.remove('show');
+  };
+}
+
+/* 7. Income Tax */
+function renderIncomeTax(){
+  mainContent.innerHTML = `
+    <h2>Income Tax Estimator</h2>
+    <div class="mini muted">Flexible: Use flat rate or define custom slabs (e.g., for new regimes).</div>
+    <label>Taxable Annual Income (₹)</label><input id="tax-income" type="number" value="800000" min="0" step="1000" />
+    <label>Calculation Mode</label>
+    <select id="tax-mode"><option value="flat">Flat Rate</option><option value="slab">Custom Slabs</option></select>
+    <div id="tax-flat" style="margin-top:12px">
+      <label>Flat Tax Rate (%)</label><input id="tax-flat-rate" type="number" value="10" step="0.01" min="0" max="100" />
+    </div>
+    <div id="tax-slabs" style="display:none;margin-top:12px">
+      <div class="mini muted">Format: upto,rate% per line (e.g., 250000,0 | 500000,5 | inf,30)</div>
+      <textarea id="tax-slabs-text" placeholder="250000,0&#10;500000,5&#10;1000000,20&#10;inf,30">250000,0
+500000,5
+1000000,20
+inf,30</textarea>
+    </div>
+    <button class="btn" id="tax-btn">Estimate Tax</button>
+    <button class="btn-ghost" id="clear-tax" style="margin-left:8px;">Clear</button>
+    <div id="tax-res" class="result"></div>
+  `;
+  const modeSel = document.getElementById('tax-mode');
+  modeSel.onchange = (e)=>{
+    document.getElementById('tax-flat').style.display = e.target.value==='flat'?'block':'none';
+    document.getElementById('tax-slabs').style.display = e.target.value==='slab'?'block':'none';
+  };
+  document.getElementById('tax-btn').onclick = ()=>{
+    const income = parseFloat(document.getElementById('tax-income').value)||0;
+    const mode = modeSel.value;
+    const res = document.getElementById('tax-res');
+    if (income <= 0) return showError(res, 'Enter a valid taxable income.');
+    if (mode==='flat'){
+      const rate = parseFloat(document.getElementById('tax-flat-rate').value)||0;
+      const tax = income * rate/100;
+      res.innerHTML = `<div class="k">Estimated Tax: ₹ ${fmt(tax)}</div><div class="mini muted">At ${rate}% flat rate. Effective rate: ${fmt((tax/income)*100)}%</div>`;
+    } else {
+      const raw = document.getElementById('tax-slabs-text').value.trim().split(/[\r\n]+/).map(s=>s.trim()).filter(Boolean);
+      if (raw.length === 0) return showError(res, 'Define at least one slab.');
+      const slabs = raw.map(line=>{
+        const parts = line.split(',').map(p=>p.trim());
+        const upto = parts[0].toLowerCase()==='inf' ? Infinity : parseFloat(parts[0]);
+        const rate = parseFloat(parts[1])||0;
+        return {upto, rate};
+      }).filter(s => isFinite(s.upto) || s.rate > 0).sort((a,b)=>a.upto - b.upto);
+      let remaining = income, prev = 0, totalTax = 0;
+      for(const s of slabs){
+        const slabSize = s.upto === Infinity ? remaining : Math.min(s.upto - prev, remaining);
+        if (slabSize > 0) {
+          totalTax += slabSize * (s.rate / 100);
+        }
+        remaining -= slabSize;
+        prev = s.upto;
+        if (remaining <= 0) break;
+      }
+      res.innerHTML = `<div class="k">Estimated Tax: ₹ ${fmt(totalTax)}</div><div class="mini muted">Effective rate: ${fmt((totalTax/income)*100)}%. Based on your slabs.</div>`;
+    }
+    res.classList.add('show');
+  };
+  modeSel.dispatchEvent(new Event('change'));
+  document.getElementById('clear-tax').onclick = function() {
+    document.getElementById('tax-income').value = '800000';
+    document.getElementById('tax-mode').value = 'flat';
+    document.getElementById('tax-flat-rate').value = '10';
+    document.getElementById('tax-slabs-text').value = '250000,0\n500000,5\n1000000,20\ninf,30';
+    document.getElementById('tax-mode').dispatchEvent(new Event('change'));
+    const resDiv = document.getElementById('tax-res');
+    resDiv.innerHTML = '';
+    resDiv.classList.remove('show');
+  };
+}
+
+/* 8. GST */
+function renderGST(){
+  mainContent.innerHTML = `
+    <h2>GST Calculator</h2>
+    <label>Base Amount (₹)</label><input id="gst-amt" type="number" value="1000" min="0" step="0.01" />
+    <label>GST Rate (%)</label><input id="gst-rate" type="number" value="18" step="0.01" min="0" max="100" />
+    <div class="row" style="margin-top:12px"><div class="col"><button class="btn" id="gst-add">Add GST</button><button class="btn-ghost" id="gst-remove" style="margin-left:8px;">Remove GST</button></div></div>
+    <button class="btn-ghost" id="clear-gst" style="margin-left:8px;">Clear</button>
+    <div id="gst-res" class="result"></div>
+  `;
+  document.getElementById('gst-add').onclick = ()=>{
+    const a = parseFloat(document.getElementById('gst-amt').value)||0;
+    const r = parseFloat(document.getElementById('gst-rate').value)||0;
+    const res = document.getElementById('gst-res');
+    if (a <= 0) return showError(res, 'Enter a valid base amount.');
+    const tax = a * r/100;
+    const total = a + tax;
+    res.innerHTML = `<div class="k">Total Incl. GST: ₹ ${fmt(total)}</div><div style="margin-top:8px"><strong>GST Amount:</strong> <span class="warning">₹ ${fmt(tax)}</span></div><div class="mini muted">Base: ₹ ${fmt(a)} @ ${r}% GST</div>`;
+    res.classList.add('show');
+  };
+  document.getElementById('gst-remove').onclick = ()=>{
+    const total = parseFloat(document.getElementById('gst-amt').value)||0;
+    const r = parseFloat(document.getElementById('gst-rate').value)||0;
+    const res = document.getElementById('gst-res');
+    if (total <= 0) return showError(res, 'Enter a valid total amount.');
+    const base = total / (1 + r/100);
+    const tax = total - base;
+    res.innerHTML = `<div class="k">Base Amount: ₹ ${fmt(base)}</div><div style="margin-top:8px"><strong>GST Amount:</strong> <span class="warning">₹ ${fmt(tax)}</span></div><div class="mini muted">Total: ₹ ${fmt(total)} @ ${r}% GST</div>`;
+    res.classList.add('show');
+  };
+  document.getElementById('clear-gst').onclick = function() {
+    document.getElementById('gst-amt').value = '1000';
+    document.getElementById('gst-rate').value = '18';
+    const resDiv = document.getElementById('gst-res');
+    resDiv.innerHTML = '';
+    resDiv.classList.remove('show');
+  };
+}
+
+/* 9. Salary */
+function renderSalary(){
+  mainContent.innerHTML = `
+    <h2>Salary In-Hand Estimator</h2>
+    <label>Gross Monthly Salary (₹)</label><input id="sal-gross" type="number" value="50000" min="0" step="100" />
+    <div class="row"><div class="col"><label>PF Contribution % (of Basic)</label><input id="sal-pf" type="number" value="12" step="0.01" min="0" max="100" /></div><div class="col"><label>Estimated Tax %</label><input id="sal-tax" type="number" value="10" step="0.01" min="0" max="100" /></div></div>
+    <div class="mini muted">Basic assumed as 45% of gross. Customize PF & tax for precision.</div>
+    <button class="btn" id="sal-btn">Estimate Net Salary</button>
+    <button class="btn-ghost" id="clear-salary" style="margin-left:8px;">Clear</button>
+    <div id="sal-res" class="result"></div>
+  `;
+  document.getElementById('sal-btn').onclick = ()=>{
+    const gross = parseFloat(document.getElementById('sal-gross').value)||0;
+    const pfPerc = parseFloat(document.getElementById('sal-pf').value)||0;
+    const taxPerc = parseFloat(document.getElementById('sal-tax').value)||0;
+    const res = document.getElementById('sal-res');
+    if (gross <= 0) return showError(res, 'Enter a valid gross salary.');
+    const basic = gross * 0.45;
+    const pf = basic * (pfPerc/100);
+    const tax = gross * (taxPerc/100);
+    const inhand = gross - pf - tax;
+    res.innerHTML = `<div class="k">Estimated In-Hand: ₹ ${fmt(inhand)}</div><div style="margin-top:8px" class="flex" style="gap:16px;justify-content:space-around"><div><strong>PF Deduction:</strong> ₹ ${fmt(pf)}</div><div><strong>Tax:</strong> ₹ ${fmt(tax)}</div></div><div class="mini muted">Basic Est.: ₹ ${fmt(basic)} | Total Deductions: ₹ ${fmt(pf + tax)}</div>`;
+    res.classList.add('show');
+  };
+  document.getElementById('clear-salary').onclick = function() {
+    document.getElementById('sal-gross').value = '50000';
+    document.getElementById('sal-pf').value = '12';
+    document.getElementById('sal-tax').value = '10';
+    const resDiv = document.getElementById('sal-res');
+    resDiv.innerHTML = '';
+    resDiv.classList.remove('show');
+  };
+}
+
+/* 10. Interest */
+function renderInterest(){
+  mainContent.innerHTML = `
+    <h2>Interest Calculator</h2>
+    <label>Principal Amount (₹)</label><input id="int-pr" type="number" value="50000" min="0" step="100" />
+    <div class="row"><div class="col"><label>Annual Rate (%)</label><input id="int-rate" type="number" value="8" step="0.01" min="0" /></div><div class="col"><label>Time Period (Years)</label><input id="int-years" type="number" value="2" min="0.1" step="0.1" /></div></div>
+    <label>Interest Type</label>
+    <select id="int-type"><option value="simple">Simple Interest</option><option value="compound">Compound Interest</option></select>
+    <div id="int-freq-block" style="display:none;margin-top:12px"><label>Compounds Per Year</label><select id="int-freq"><option value="1">Annually</option><option value="12" selected>Monthly</option><option value="4">Quarterly</option><option value="365">Daily</option></select></div>
+    <button class="btn" id="int-btn">Calculate</button>
+    <button class="btn-ghost" id="clear-interest" style="margin-left:8px;">Clear</button>
+    <div id="int-res" class="result"></div>
+  `;
+  const typeSel = document.getElementById('int-type');
+  typeSel.onchange = (e)=> {
+    document.getElementById('int-freq-block').style.display = e.target.value==='compound' ? 'block' : 'none';
+  };
+  document.getElementById('int-btn').onclick = ()=>{
+    const P = parseFloat(document.getElementById('int-pr').value)||0;
+    const r = parseFloat(document.getElementById('int-rate').value)||0;
+    const y = parseFloat(document.getElementById('int-years').value)||0;
+    const type = typeSel.value;
+    const res = document.getElementById('int-res');
+    if (P <= 0) return showError(res, 'Enter a valid principal.');
+    if (y <= 0) return showError(res, 'Enter a valid time period.');
+    if (type==='simple'){
+      const interest = P * r/100 * y;
+      const total = P + interest;
+      res.innerHTML = `<div class="k">Total Amount: ₹ ${fmt(total)}</div><div style="margin-top:8px"><strong>Interest:</strong> <span class="success">₹ ${fmt(interest)}</span></div><div class="mini muted">Simple interest formula: P * R * T / 100</div>`;
+    } else {
+      const m = parseInt(document.getElementById('int-freq').value)||1;
+      const A = P * Math.pow(1 + (r/100)/m, m*y);
+      const interest = A - P;
+      const freqText = {1:'Annually',12:'Monthly',4:'Quarterly',365:'Daily'}[m] || 'Custom';
+      res.innerHTML = `<div class="k">Maturity Amount: ₹ ${fmt(A)}</div><div style="margin-top:8px"><strong>Interest:</strong> <span class="success">₹ ${fmt(interest)}</span></div><div class="mini muted">Compounded ${freqText}.</div>`;
+    }
+    res.classList.add('show');
+  };
+  typeSel.dispatchEvent(new Event('change'));
+  document.getElementById('clear-interest').onclick = function() {
+    document.getElementById('int-pr').value = '50000';
+    document.getElementById('int-rate').value = '8';
+    document.getElementById('int-years').value = '2';
+    document.getElementById('int-type').value = 'simple';
+    document.getElementById('int-freq').value = '12';
+    document.getElementById('int-type').dispatchEvent(new Event('change'));
+    const resDiv = document.getElementById('int-res');
+    resDiv.innerHTML = '';
+    resDiv.classList.remove('show');
+  };
+}
+
+/* 11. Currency */
+function renderCurrency(){
+  mainContent.innerHTML = `
+    <h2>Currency Converter</h2>
+    <label>Amount to Convert</label><input id="cur-amt" type="number" value="100" min="0" step="0.01" />
+    <div class="row"><div class="col"><label>From Currency</label><input id="cur-from" value="USD" placeholder="e.g., USD" /></div><div class="col"><label>To Currency</label><input id="cur-to" value="INR" placeholder="e.g., INR" /></div></div>
+    <label>Exchange Rate (1 From = ? To)</label><input id="cur-rate" type="number" value="83.5" step="0.001" min="0" />
+    <button class="btn" id="cur-btn">Convert Now</button>
+    <button class="btn-ghost" id="clear-currency" style="margin-left:8px;">Clear</button>
+    <div id="cur-res" class="result"></div>
+  `;
+  document.getElementById('cur-btn').onclick = ()=>{
+    const amt = parseFloat(document.getElementById('cur-amt').value)||0;
+    const rate = parseFloat(document.getElementById('cur-rate').value)||0;
+    const from = document.getElementById('cur-from').value.trim() || 'FROM';
+    const to = document.getElementById('cur-to').value.trim() || 'TO';
+    const res = document.getElementById('cur-res');
+    if (amt <= 0) return showError(res, 'Enter a valid amount.');
+    if (rate <= 0) return showError(res, 'Enter a valid exchange rate.');
+    const conv = amt * rate;
+    res.innerHTML = `<div class="k"><strong>${fmt(amt)} ${from}</strong> = <strong>${fmt(conv)} ${to}</strong></div><div class="mini muted">Rate: 1 ${from} = ${fmt(rate)} ${to} | Updated manually for accuracy.</div>`;
+    res.classList.add('show');
+  };
+  document.getElementById('clear-currency').onclick = function() {
+    document.getElementById('cur-amt').value = '100';
+    document.getElementById('cur-from').value = 'USD';
+    document.getElementById('cur-to').value = 'INR';
+    document.getElementById('cur-rate').value = '83.5';
+    const resDiv = document.getElementById('cur-res');
+    resDiv.innerHTML = '';
+    resDiv.classList.remove('show');
+  };
+}
+
+/* 12. Profit Margin */
+function renderProfit(){
+  mainContent.innerHTML = `
+    <h2>Profit Margin Calculator</h2>
+    <label>Cost Price (₹)</label><input id="pm-cost" type="number" value="500" min="0" step="0.01" />
+    <div class="row"><div class="col"><label>Selling Price (₹)</label><input id="pm-sell" type="number" value="700" min="0" step="0.01" /></div><div class="col"><label>Target Margin % (Optional)</label><input id="pm-margin" type="number" value="20" step="0.01" min="0" max="100" /></div></div>
+    <div class="mini muted">Provide cost & sell for analysis, or cost & margin for suggested sell price.</div>
+    <button class="btn" id="pm-btn">Analyze Profit</button>
+    <button class="btn-ghost" id="clear-profit" style="margin-left:8px;">Clear</button>
+    <div id="pm-res" class="result"></div>
+  `;
+  document.getElementById('pm-btn').onclick = ()=>{
+    const cost = parseFloat(document.getElementById('pm-cost').value)||0;
+    const sell = parseFloat(document.getElementById('pm-sell').value);
+    const marginTarget = parseFloat(document.getElementById('pm-margin').value)||0;
+    const res = document.getElementById('pm-res');
+    if (cost <= 0) return showError(res, 'Enter a valid cost price.');
+    if (isNaN(sell) || sell <= 0) {
+      if (marginTarget <= 0) return showError(res, 'Provide selling price or target margin.');
+      const suggestedSell = cost / (1 - marginTarget/100);
+      const profit = suggestedSell - cost;
+      res.innerHTML = `<div class="k">Suggested Sell Price: ₹ ${fmt(suggestedSell)}</div><div style="margin-top:8px"><strong>Expected Profit:</strong> <span class="success">₹ ${fmt(profit)}</span> | <strong>Margin:</strong> ${marginTarget}%</div><div class="mini muted">To achieve ${marginTarget}% margin on selling price.</div>`;
+    } else {
+      const profit = sell - cost;
+      const marginPct = (profit / sell) * 100;
+      const markupPct = (profit / cost) * 100;
+      const profitColor = profit > 0 ? 'success' : 'error';
+      res.innerHTML = `<div><strong>Profit:</strong> <span class="${profitColor}">₹ ${fmt(profit)}</span></div><div style="margin-top:8px"><strong>Margin (on Sell):</strong> ${fmt(marginPct)}% | <strong>Markup (on Cost):</strong> ${fmt(markupPct)}%</div><div class="mini muted">Cost: ₹ ${fmt(cost)} | Sell: ₹ ${fmt(sell)}</div>`;
+    }
+    res.classList.add('show');
+  };
+  document.getElementById('clear-profit').onclick = function() {
+    document.getElementById('pm-cost').value = '500';
+    document.getElementById('pm-sell').value = '700';
+    document.getElementById('pm-margin').value = '20';
+    const resDiv = document.getElementById('pm-res');
+    resDiv.innerHTML = '';
+    resDiv.classList.remove('show');
+  };
+}
+
+/* 13. Electric Bill */
+function renderElectric(){
+  mainContent.innerHTML = `
+    <h2>Electricity Bill Estimator</h2>
+    <label>Units Consumed (kWh)</label><input id="elec-units" type="number" value="350" min="0" step="0.1" />
+    <div class="mini muted">Customize slabs: upto units,rate ₹/unit per line (e.g., 100,3 | inf,8)</div>
+    <label>Slab Rates</label>
+    <textarea id="elec-slabs" placeholder="100,3&#10;200,5&#10;300,7&#10;inf,8">100,3
+200,5
+300,7
+inf,8</textarea>
+    <button class="btn" id="elec-btn">Estimate Bill</button>
+    <button class="btn-ghost" id="clear-electric" style="margin-left:8px;">Clear</button>
+    <div id="elec-res" class="result"></div>
+  `;
+  document.getElementById('elec-btn').onclick = ()=>{
+    const units = parseFloat(document.getElementById('elec-units').value)||0;
+    const raw = document.getElementById('elec-slabs').value.trim().split(/[\r\n]+/).map(s=>s.trim()).filter(Boolean);
+    const res = document.getElementById('elec-res');
+    if (units <= 0) return showError(res, 'Enter valid units consumed.');
+    if (raw.length === 0) return showError(res, 'Define slab rates.');
+    const slabs = raw.map(line=>{
+      const [uptoStr, rateStr] = line.split(',').map(x=>x.trim());
+      return {upto: uptoStr.toLowerCase()==='inf'?Infinity:parseFloat(uptoStr), rate: parseFloat(rateStr)||0};
+    }).filter(s => s.rate >= 0).sort((a,b)=>a.upto - b.upto);
+    let remaining = units, prev=0, total=0;
+    for(const s of slabs){
+      const take = s.upto === Infinity ? remaining : Math.min(s.upto - prev, remaining);
+      total += take * s.rate;
+      remaining -= take;
+      prev = s.upto;
+      if (remaining <= 0) break;
+    }
+    res.innerHTML = `<div class="k">Estimated Bill: ₹ ${fmt(total)}</div><div class="mini muted">For ${units} units across your slabs. Excludes fixed charges/taxes.</div>`;
+    res.classList.add('show');
+  };
+  document.getElementById('clear-electric').onclick = function() {
+    document.getElementById('elec-units').value = '350';
+    document.getElementById('elec-slabs').value = '100,3\n200,5\n300,7\ninf,8';
+    const resDiv = document.getElementById('elec-res');
+    resDiv.innerHTML = '';
+    resDiv.classList.remove('show');
+  };
+}
+
+/* 14. Discount */
+function renderDiscount(){
+  mainContent.innerHTML = `
+    <h2>Discount Calculator</h2>
+    <label>Original Price (₹)</label><input id="disc-orig" type="number" value="2000" min="0" step="0.01" />
+    <div class="row"><div class="col"><label>Discount %</label><input id="disc-pct" type="number" value="25" step="0.01" min="0" max="100" /></div><div class="col"><label>Or Flat Discount (₹)</label><input id="disc-amt" type="number" min="0" step="0.01" /></div></div>
+    <button class="btn" id="disc-btn">Apply Discount</button>
+    <button class="btn-ghost" id="clear-discount" style="margin-left:8px;">Clear</button>
+    <div id="disc-res" class="result"></div>
+  `;
+  document.getElementById('disc-btn').onclick = ()=>{
+    const orig = parseFloat(document.getElementById('disc-orig').value)||0;
+    const pct = parseFloat(document.getElementById('disc-pct').value);
+    const amt = parseFloat(document.getElementById('disc-amt').value);
+    const res = document.getElementById('disc-res');
+    if (orig <= 0) return showError(res, 'Enter a valid original price.');
+    let final=orig, saved=0, method='';
+    if (!isNaN(amt) && amt > 0 && amt < orig){
+      saved = amt; final = orig - amt; method = `Flat ₹${fmt(amt)}`;
+    } else if (!isNaN(pct) && pct > 0 && pct <= 100){
+      saved = orig * pct/100; final = orig - saved; method = `${pct}% off`;
+    } else {
+      return showError(res, 'Provide either discount % or flat amount.');
+    }
+    res.innerHTML = `<div class="k">Final Price: ₹ ${fmt(final)}</div><div style="margin-top:8px"><strong>Savings:</strong> <span class="success">₹ ${fmt(saved)}</span> via ${method}</div><div class="mini muted">Original: ₹ ${fmt(orig)}</div>`;
+    res.classList.add('show');
+  };
+  document.getElementById('clear-discount').onclick = function() {
+    document.getElementById('disc-orig').value = '2000';
+    document.getElementById('disc-pct').value = '25';
+    document.getElementById('disc-amt').value = '';
+    const resDiv = document.getElementById('disc-res');
+    resDiv.innerHTML = '';
+    resDiv.classList.remove('show');
+  };
+}
+
+/* init first tool */
+openTool('emi');
+
+/* global enhancements: keyboard support */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+    const btn = e.target.closest('.row')?.querySelector('button') || document.querySelector('button.btn');
+    if (btn) btn.click();
+  }
+});
+</script>
+
+<!-- 300x250 AD -->
+<div style="width:100%;text-align:center;margin:20px 0">
+<script>
+  atOptions = {
+    'key' : '24af69b743e7d67e1d00ad5a1eaef9c2',
+    'format' : 'iframe',
+    'height' : 250,
+    'width' : 300,
+    'params' : {}
+  };
+</script>
+<script src="https://www.highperformanceformat.com/24af69b743e7d67e1d00ad5a1eaef9c2/invoke.js"></script>
+</div>
+
+<!-- EXTRA TOOLS: Monthly Bought Planner & eCommerce Calculator (unchanged) -->
+<div style="max-width:900px;margin:40px auto">
+
+  <!-- Monthly Bought Planner & Saving -->
+  <div class="tool-section">
+    <div class="tool-header">
+      <h2>📅 Monthly Bought Planner & Saving</h2>
+      <div class="button-group">
+        <button class="btn-ghost" onclick="clearMonthlyPlanner()">Clear All</button>
+        <button class="btn" onclick="saveMonthlyPlanner()">💾 Save Plan</button>
+      </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <label>Monthly Salary (Income)</label>
+      <input type="number" id="salaryIncome" value="50000" min="0" step="100" style="max-width:300px;">
+    </div>
+    <div class="expense-grid">
+      <div class="expense-item"><label>Rent/EMI</label><input type="number" id="expRent" value="0" min="0" step="100"></div>
+      <div class="expense-item"><label>Utilities</label><input type="number" id="expUtilities" value="0" min="0" step="100"></div>
+      <div class="expense-item"><label>Transport</label><input type="number" id="expTransport" value="0" min="0" step="100"></div>
+      <div class="expense-item"><label>Mobile/DTH</label><input type="number" id="expMobile" value="0" min="0" step="100"></div>
+      <div class="expense-item"><label>Food</label><input type="number" id="expFood" value="0" min="0" step="100"></div>
+      <div class="expense-item"><label>Shopping</label><input type="number" id="expShopping" value="0" min="0" step="100"></div>
+      <div class="expense-item"><label>Entertainment</label><input type="number" id="expEntertainment" value="0" min="0" step="100"></div>
+      <div class="expense-item"><label>Medical/Insurance</label><input type="number" id="expMedical" value="0" min="0" step="100"></div>
+      <div class="expense-item"><label>Miscellaneous</label><input type="number" id="expMisc" value="0" min="0" step="100"></div>
+    </div>
+    <div class="result-box" id="plannerResult">
+      Total Expenses: ₹0.00 | Savings: ₹0.00
+    </div>
+    <p class="mini muted">Click "Save Plan" to store current values in your browser. They will load automatically next time.</p>
+  </div>
+
+  <!-- eCommerce Calculator (with currency) -->
+  <div class="tool-section">
+    <div class="tool-header">
+      <h2>🛒 eCommerce Profit Calculator</h2>
+      <div class="button-group">
+        <button class="btn-ghost" onclick="clearEcommerce()">Clear</button>
+        <button class="btn" onclick="saveEcommerce()">💾 Save</button>
+      </div>
+    </div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+      <div style="flex:1; min-width:150px;">
+        <label>Currency</label>
+        <select id="ecomCurrency">
+          <option value="₹">INR (₹)</option>
+          <option value="$">USD ($)</option>
+          <option value="€">EUR (€)</option>
+          <option value="£">GBP (£)</option>
+        </select>
+      </div>
+      <div style="flex:1; min-width:150px;">
+        <label>Item Price</label>
+        <input type="number" id="ecomPrice" value="1000" min="0" step="0.01">
+      </div>
+      <div style="flex:1; min-width:150px;">
+        <label>Quantity</label>
+        <input type="number" id="ecomQty" value="1" min="1" step="1">
+      </div>
+    </div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px;">
+      <div style="flex:1; min-width:150px;">
+        <label>Discount (%)</label>
+        <input type="number" id="ecomDiscount" value="0" min="0" max="100" step="0.1">
+      </div>
+      <div style="flex:1; min-width:150px;">
+        <label>Tax Rate (%)</label>
+        <input type="number" id="ecomTax" value="0" min="0" step="0.1">
+      </div>
+      <div style="flex:1; min-width:150px;">
+        <label>Shipping Cost</label>
+        <input type="number" id="ecomShipping" value="0" min="0" step="0.01">
+      </div>
+    </div>
+    <button class="btn" onclick="calcEcommerce()" style="margin-right:8px;">Calculate</button>
+    <div class="result-box" id="ecomResult">
+      Final Price: ₹0.00
+    </div>
+    <p class="mini muted">Click "Save" to store these values. They will load next time.</p>
+  </div>
+
+  <!-- Optional global clear (already per tool) -->
+</div>
+
+<!-- NATIVE AD -->
+<div style="margin:30px 0;text-align:center">
+<script async="async" data-cfasync="false" src="https://pl28847923.effectivegatecpm.com/c5d592fc337bc5ea83fd38a7e4a62646/invoke.js"></script>
+<div id="container-c5d592fc337bc5ea83fd38a7e4a62646"></div>
+</div>
+
+<script>
+// ========== Monthly Bought Planner ==========
+function updatePlanner() {
+  const salary = parseFloat(document.getElementById('salaryIncome').value) || 0;
+  const categories = ['Rent','Utilities','Transport','Mobile','Food','Shopping','Entertainment','Medical','Misc'];
+  let total = 0;
+  categories.forEach(cat => {
+    total += parseFloat(document.getElementById('exp'+cat).value) || 0;
+  });
+  const savings = salary - total;
+  const currency = '₹';
+  document.getElementById('plannerResult').innerHTML = `Total Expenses: ${currency}${fmt(total)} | Savings: <span class="${savings >= 0 ? 'success' : 'error'}">${currency}${fmt(savings)}</span>`;
+}
+function bindPlannerInputs() {
+  const ids = ['salaryIncome','expRent','expUtilities','expTransport','expMobile','expFood','expShopping','expEntertainment','expMedical','expMisc'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updatePlanner);
+  });
+}
+function clearMonthlyPlanner() {
+  document.getElementById('salaryIncome').value = '50000';
+  document.getElementById('expRent').value = '0';
+  document.getElementById('expUtilities').value = '0';
+  document.getElementById('expTransport').value = '0';
+  document.getElementById('expMobile').value = '0';
+  document.getElementById('expFood').value = '0';
+  document.getElementById('expShopping').value = '0';
+  document.getElementById('expEntertainment').value = '0';
+  document.getElementById('expMedical').value = '0';
+  document.getElementById('expMisc').value = '0';
+  updatePlanner();
+}
+function saveMonthlyPlanner() {
+  const data = {
+    salary: document.getElementById('salaryIncome').value,
+    rent: document.getElementById('expRent').value,
+    utilities: document.getElementById('expUtilities').value,
+    transport: document.getElementById('expTransport').value,
+    mobile: document.getElementById('expMobile').value,
+    food: document.getElementById('expFood').value,
+    shopping: document.getElementById('expShopping').value,
+    entertainment: document.getElementById('expEntertainment').value,
+    medical: document.getElementById('expMedical').value,
+    misc: document.getElementById('expMisc').value
+  };
+  localStorage.setItem('monthlyPlanner', JSON.stringify(data));
+  alert('Plan saved to browser!');
+}
+function loadMonthlyPlanner() {
+  const saved = localStorage.getItem('monthlyPlanner');
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      document.getElementById('salaryIncome').value = data.salary || '50000';
+      document.getElementById('expRent').value = data.rent || '0';
+      document.getElementById('expUtilities').value = data.utilities || '0';
+      document.getElementById('expTransport').value = data.transport || '0';
+      document.getElementById('expMobile').value = data.mobile || '0';
+      document.getElementById('expFood').value = data.food || '0';
+      document.getElementById('expShopping').value = data.shopping || '0';
+      document.getElementById('expEntertainment').value = data.entertainment || '0';
+      document.getElementById('expMedical').value = data.medical || '0';
+      document.getElementById('expMisc').value = data.misc || '0';
+    } catch (e) {}
+  }
+  updatePlanner();
+}
+
+// ========== eCommerce Calculator ==========
+function calcEcommerce() {
+  const currency = document.getElementById('ecomCurrency').value;
+  const price = parseFloat(document.getElementById('ecomPrice').value) || 0;
+  const qty = parseInt(document.getElementById('ecomQty').value) || 1;
+  const discount = parseFloat(document.getElementById('ecomDiscount').value) || 0;
+  const tax = parseFloat(document.getElementById('ecomTax').value) || 0;
+  const shipping = parseFloat(document.getElementById('ecomShipping').value) || 0;
+  
+  let subtotal = price * qty;
+  let discountAmount = subtotal * (discount / 100);
+  let afterDiscount = subtotal - discountAmount;
+  let taxAmount = afterDiscount * (tax / 100);
+  let final = afterDiscount + taxAmount + shipping;
+  
+  document.getElementById('ecomResult').innerHTML = `Final Price: ${currency}${fmt(final)} <span class="mini muted">(Subtotal: ${currency}${fmt(subtotal)}, Discount: -${currency}${fmt(discountAmount)}, Tax: +${currency}${fmt(taxAmount)}, Shipping: +${currency}${fmt(shipping)})</span>`;
+}
+function clearEcommerce() {
+  document.getElementById('ecomCurrency').value = '₹';
+  document.getElementById('ecomPrice').value = '1000';
+  document.getElementById('ecomQty').value = '1';
+  document.getElementById('ecomDiscount').value = '0';
+  document.getElementById('ecomTax').value = '0';
+  document.getElementById('ecomShipping').value = '0';
+  calcEcommerce();
+}
+function saveEcommerce() {
+  const data = {
+    currency: document.getElementById('ecomCurrency').value,
+    price: document.getElementById('ecomPrice').value,
+    qty: document.getElementById('ecomQty').value,
+    discount: document.getElementById('ecomDiscount').value,
+    tax: document.getElementById('ecomTax').value,
+    shipping: document.getElementById('ecomShipping').value
+  };
+  localStorage.setItem('ecommerceCalc', JSON.stringify(data));
+  alert('eCommerce values saved!');
+}
+function loadEcommerce() {
+  const saved = localStorage.getItem('ecommerceCalc');
+  if (saved) {
+    try {
+      const data = JSON.parse(saved);
+      document.getElementById('ecomCurrency').value = data.currency || '₹';
+      document.getElementById('ecomPrice').value = data.price || '1000';
+      document.getElementById('ecomQty').value = data.qty || '1';
+      document.getElementById('ecomDiscount').value = data.discount || '0';
+      document.getElementById('ecomTax').value = data.tax || '0';
+      document.getElementById('ecomShipping').value = data.shipping || '0';
+    } catch (e) {}
+  }
+  calcEcommerce();
+}
+
+// Initialize extra tools
+window.addEventListener('load', function() {
+  bindPlannerInputs();
+  loadMonthlyPlanner();
+  loadEcommerce();
+  ['ecomPrice','ecomQty','ecomDiscount','ecomTax','ecomShipping'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', calcEcommerce);
+  });
+  document.getElementById('ecomCurrency')?.addEventListener('change', calcEcommerce);
+});
+
+function fmt(n) {
+  if (!isFinite(n)) return '-';
+  return Number(n).toLocaleString(undefined, {maximumFractionDigits:2, minimumFractionDigits:2});
+}
+</script>
+
+<!-- Clear all function (optional) -->
+<script>
+function clearAll() {
+  // This function is kept to avoid errors if called from old button, but we removed that button.
+}
+</script>
+
+</body>
+</html>
